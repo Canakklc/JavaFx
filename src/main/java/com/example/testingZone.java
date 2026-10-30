@@ -2,11 +2,15 @@ package com.example;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+
+
 import java.io.File;
+import java.lang.reflect.Array;
+import java.security.cert.LDAPCertStoreParameters;
 
 public class testingZone {
             public static  ArrayList<FlightIntel> flightList = new ArrayList<>();
-           
+            public static String noFlight;
 
 
     public static class FlightIntel{
@@ -22,10 +26,17 @@ public class testingZone {
 
         }
 
+        
+
        public String getInfo(){
         return String.format("Flight:%s | Origin:%s | Destination:%s | Dep:%s | Arr:%s | Aircraft:%s", 
             flight, origin, destination, departure, arrival, airCraft);
-    }
+        }
+
+        @Override 
+        public String toString(){
+            return String.format("Flight:%s | Origin:%s | Destination:%s | Dep%s | Arrival:%s | Aircraft:%s",flight,origin,destination,departure,arrival,airCraft);
+        }
 
         static void ReadFile(){
            try{
@@ -46,12 +57,43 @@ public class testingZone {
             
            }        
         }
+
+        static FlightIntel SearchForFlight(String input){
+    ArrayList<FlightIntel> foundFlightList = new ArrayList<>();
+
+    try {
+        Scanner scanner = new Scanner(new File("datas.txt"));
+        while(scanner.hasNextLine()){
+            String line = scanner.nextLine();
+            String lines[] = line.split("/");
+
+            if(lines.length >= 6) { 
+                FlightIntel obj = new FlightIntel(lines[0], lines[1], lines[2], lines[3], lines[4], lines[5]);
+                foundFlightList.add(obj);
+                String newInput =input.toUpperCase().trim();
+
+                if(newInput != null && obj.flight != null && newInput.contains(obj.flight)){
+                    scanner.close();
+                    System.out.println(obj.flight);
+                    return obj;
+                    
+                }
+            }
+        }
+        scanner.close(); 
+    } catch(Exception e) {
+        System.out.println(e.getMessage());
+    }
+    
+    return null;
+}
     }
 
 
     public static void main(String[] args) {
         int index =1;
         testingZone.FlightIntel.ReadFile();
+        FlightIntel.SearchForFlight("TK1001");
 
         for(int i = 0; i<testingZone.flightList.size();i++){
             System.out.println(index + ": " + testingZone.flightList.get(i).getInfo());
