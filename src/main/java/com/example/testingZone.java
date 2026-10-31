@@ -5,6 +5,9 @@ import java.util.Scanner;
 
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.lang.reflect.Array;
 import java.security.cert.LDAPCertStoreParameters;
 
@@ -25,8 +28,26 @@ public class testingZone {
             this.airCraft = airCraft;
 
         }
-
+        String newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft;
         
+        //Method Intel
+        public static void AddFlight(String newFlight, String newOrigin, String newDestination, String newDeparture, String newArrival, String newAircraft ){
+            FlightIntel addedFlight = new FlightIntel(newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft);
+            flightList.add(addedFlight);
+            //Add to Datas
+            String addedFlightData=(addedFlight.flight + "/" + addedFlight.origin +"/"+ addedFlight.destination +"/" + addedFlight.departure+"/"+ addedFlight.arrival+"/"+ addedFlight.airCraft);
+            try(FileWriter fr = new FileWriter("datas.txt",true)){
+                PrintWriter pw = new PrintWriter(fr);
+
+                pw.println(addedFlightData);
+            }catch(Exception e){
+                System.out.println(e);
+            }
+
+            
+
+            
+        }
 
        public String getInfo(){
         return String.format("Flight:%s | Origin:%s | Destination:%s | Dep:%s | Arr:%s | Aircraft:%s", 
