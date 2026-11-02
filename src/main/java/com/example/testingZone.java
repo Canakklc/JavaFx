@@ -13,7 +13,10 @@ import java.security.cert.LDAPCertStoreParameters;
 
 public class testingZone {
             public static  ArrayList<FlightIntel> flightList = new ArrayList<>();
+            public static ArrayList<Boolean> allConditions = new ArrayList<>(3);
+            //1th=checkAircraft 2th= check airport 3th= check if its arrived !dont forget put departure arrival slot
             public static String noFlight;
+            public static FlightIntel addedFlight;
 
 
     public static class FlightIntel{
@@ -32,10 +35,12 @@ public class testingZone {
         
         //Method Intel
         public static void AddFlight(String newFlight, String newOrigin, String newDestination, String newDeparture, String newArrival, String newAircraft ){
-            FlightIntel addedFlight = new FlightIntel(newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft);
+            addedFlight = new FlightIntel(newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft);
             flightList.add(addedFlight);
             //Add to Datas
             String addedFlightData=(addedFlight.flight + "/" + addedFlight.origin +"/"+ addedFlight.destination +"/" + addedFlight.departure+"/"+ addedFlight.arrival+"/"+ addedFlight.airCraft);
+
+            
             try(FileWriter fr = new FileWriter("datas.txt",true)){
                 PrintWriter pw = new PrintWriter(fr);
 
@@ -44,9 +49,16 @@ public class testingZone {
                 System.out.println(e);
             }
 
-            
+        }
 
-            
+        public static void CheckPlaneTimeCond(){//Buraya devam
+            for(int i = 0; i<flightList.size();i++){
+               if(flightList.get(i).departure == addedFlight.departure){
+                allConditions.set(0,false);
+               }else{
+                allConditions.set(0, true);
+               }
+            }
         }
 
        public String getInfo(){
