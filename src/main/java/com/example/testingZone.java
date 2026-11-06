@@ -1,6 +1,7 @@
 package com.example;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 
@@ -13,10 +14,12 @@ import java.security.cert.LDAPCertStoreParameters;
 
 public class testingZone {
             public static  ArrayList<FlightIntel> flightList = new ArrayList<>();
-            public static ArrayList<Boolean> allConditions = new ArrayList<>(3);
+            public static ArrayList<Integer> departureMins = new ArrayList<>();
+            public static boolean[] cond = new boolean[3];
             //1th=checkAircraft 2th= check airport 3th= check if its arrived !dont forget put departure arrival slot
             public static String noFlight;
             public static FlightIntel addedFlight;
+            public static int oldTotal;
 
 
     public static class FlightIntel{
@@ -36,6 +39,10 @@ public class testingZone {
         //Method Intel
         public static void AddFlight(String newFlight, String newOrigin, String newDestination, String newDeparture, String newArrival, String newAircraft ){
             addedFlight = new FlightIntel(newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft);
+            CheckAirCraft();
+            //newDepartureTime = Integer.parseInt(addedFlight.departure);//Broken 
+            //ConvertDepaturesToMin();
+            //CheckAirCraft();
             flightList.add(addedFlight);
             //Add to Datas
             String addedFlightData=(addedFlight.flight + "/" + addedFlight.origin +"/"+ addedFlight.destination +"/" + addedFlight.departure+"/"+ addedFlight.arrival+"/"+ addedFlight.airCraft);
@@ -51,14 +58,61 @@ public class testingZone {
 
         }
 
-        public static void CheckPlaneTimeCond(){//Buraya devam
+        public static void ConvertDepaturesToMin(){
+            if(addedFlight==null)return;
             for(int i = 0; i<flightList.size();i++){
-               if(flightList.get(i).departure == addedFlight.departure){
-                allConditions.set(0,false);
-               }else{
-                allConditions.set(0, true);
-               }
+                String stringTime = flightList.get(i).departure;
+                String []Times = stringTime.split(":");
+                
+                int hour = Integer.parseInt(Times[0]) * 60;
+                int min = Integer.parseInt(Times[1]);
+
+                int totalMin = hour + min;
+                departureMins.add(totalMin);
+                
+                
             }
+            System.out.println(departureMins);
+
+        }
+        public static void CheckAirCraft() {
+        String[] newDepartureTime = addedFlight.departure.split(":");
+        int newHour = Integer.parseInt(newDepartureTime[0]);
+        int newMin = Integer.parseInt(newDepartureTime[1]);
+        int newTotalTime = (newHour * 60) + newMin;
+
+        boolean isAllowed = true;
+
+        for (int i = 0; i < flightList.size(); i++) {
+            if (addedFlight.airCraft.equals(flightList.get(i).airCraft)) {
+                
+                String[] oldArrivalTime = flightList.get(i).arrival.split(":");
+                int oldHour = Integer.parseInt(oldArrivalTime[0]);
+                int oldMin = Integer.parseInt(oldArrivalTime[1]);
+                int oldTotalTime = (oldHour * 60) + oldMin;
+
+                int gap = newTotalTime - oldTotalTime;
+
+                if (gap < 45) {
+                    isAllowed = false;
+                    System.out.println("Abort " + gap);
+                    break; 
+                }
+            }
+    }
+
+    if (isAllowed) {
+        cond[0]=true;
+        System.out.print("Approve"+cond[0]);
+        
+        
+    } else {
+        System.out.println("Abort");
+    }
+}
+
+        public static void CheckIfFlightArrived(){//Buraya devam
+          //
         }
 
        public String getInfo(){
@@ -132,5 +186,7 @@ public class testingZone {
             System.out.println(index + ": " + testingZone.flightList.get(i).getInfo());
             index += 1;
         }
+        //testingZone.FlightIntel.ConvertDepaturesToMin();
+        
     }
 }
