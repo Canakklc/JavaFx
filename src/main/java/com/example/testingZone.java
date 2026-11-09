@@ -2,6 +2,8 @@ package com.example;
 
 // Test Comment
 
+// A second test comment
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
