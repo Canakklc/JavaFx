@@ -2,8 +2,10 @@ package com.example;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Scanner;
 
+import javafx.stage.StageStyle;
 
 import java.io.File;
 import java.io.FileReader;
@@ -15,6 +17,9 @@ import java.security.cert.LDAPCertStoreParameters;
 public class testingZone {
             public static  ArrayList<FlightIntel> flightList = new ArrayList<>();
             public static ArrayList<Integer> departureMins = new ArrayList<>();
+            public static ArrayList<String> arrivalAirports = new ArrayList<>();//Airports to bear in mind
+            public static ArrayList<String> depatureSlots = new ArrayList<>();
+            public static HashMap<String, Integer> airportAndSlots = new HashMap<>();
             public static boolean[] cond = new boolean[3];
             //1th=checkAircraft 2th= check airport 3th= check if its arrived !dont forget put departure arrival slot
             public static String noFlight;
@@ -107,13 +112,25 @@ public class testingZone {
         
         
     } else {
+        cond[0] = false;
         System.out.println("Abort");
     }
 }
 
-        public static void CheckIfFlightArrived(){//Buraya devam
-          //
-        }
+        public static void ArrivalDepartureSlots(){//Buraya devam
+            for(int i = 0; i<flightList.size(); i++){
+                arrivalAirports.add(flightList.get(i).arrival);
+                airportAndSlots.put(flightList.get(i).origin, 2);
+                depatureSlots.add(flightList.get(i).departure);
+                airportAndSlots.put(flightList.get(i).destination,2);
+                }
+            
+            System.out.print(arrivalAirports );
+            System.out.print(depatureSlots);
+            System.out.print(airportAndSlots);
+
+
+        }                
 
        public String getInfo(){
         return String.format("Flight:%s | Origin:%s | Destination:%s | Dep:%s | Arr:%s | Aircraft:%s", 
@@ -181,12 +198,12 @@ public class testingZone {
         int index =1;
         testingZone.FlightIntel.ReadFile();
         FlightIntel.SearchForFlight("TK1001");
-
         for(int i = 0; i<testingZone.flightList.size();i++){
             System.out.println(index + ": " + testingZone.flightList.get(i).getInfo());
             index += 1;
         }
         //testingZone.FlightIntel.ConvertDepaturesToMin();
         
+        testingZone.FlightIntel.ArrivalDepartureSlots();
     }
 }

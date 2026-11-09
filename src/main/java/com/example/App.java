@@ -414,7 +414,7 @@ public class App extends Application {
             confirmationStage.close();
         });
 
-        confirtAddingButton.setOnAction(confirm ->{
+        confirtAddingButton.setOnAction(confirm ->{                                            
             testingZone.FlightIntel.AddFlight(
                 addFields[0].getText(), 
                 addFields[1].getText(), 
