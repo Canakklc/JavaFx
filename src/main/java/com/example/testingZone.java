@@ -4,6 +4,8 @@ package com.example;
 
 // A second test comment
 
+// Wow, a third test comment
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
