@@ -19,8 +19,8 @@ import java.security.cert.LDAPCertStoreParameters;
 public class testingZone {
     public static ArrayList<FlightIntel> flightList = new ArrayList<>();
     public static ArrayList<Integer> departureMins = new ArrayList<>();
-    public static boolean[] cond = new boolean[3];
-    // 0 -> check aircraft conflict 1-> check airport conflict
+    public static boolean[] cond = new boolean[4];
+    // 0 -> check aircraft conflict 1-> check airport conflict 2-> check validation
     public static String noFlight;
     public static FlightIntel addedFlight;
     public static int oldTotal;
@@ -49,18 +49,24 @@ public class testingZone {
             addedFlight = new FlightIntel(newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft);
             CheckAirCraft();
             CheckForOverlap();
-            //CheckIfOverlapses();
-            flightList.add(addedFlight);
-            
-            //Add to Datas
-            String addedFlightData = (addedFlight.flight + "/" + addedFlight.origin +"/"+ addedFlight.destination +"/" + addedFlight.departure+"/"+ addedFlight.arrival+"/"+ addedFlight.airCraft);
+            CheckDepArriveValidation();
 
-            try(FileWriter fr = new FileWriter("datas.txt", true)){
-                PrintWriter pw = new PrintWriter(fr);
-                pw.println(addedFlightData);
-            } catch(Exception e){
-                System.out.println(e);
+            //if all conds are fulfilled
+            if(cond[0] && cond[1] && cond[2] && cond[3] == true){
+                flightList.add(addedFlight);
+                //Add to Datas
+                String addedFlightData = (addedFlight.flight + "/" + addedFlight.origin +"/"+ addedFlight.destination +"/" + addedFlight.departure+"/"+ addedFlight.arrival+"/"+ addedFlight.airCraft);
+    
+                try(FileWriter fr = new FileWriter("datas.txt", true)){
+                    PrintWriter pw = new PrintWriter(fr);
+                    pw.println(addedFlightData);
+                } catch(Exception e){
+                    System.out.println(e);
+                }
+            }else{
+                System.out.println("One of the conditions or multiple is");
             }
+            
         }
 
         public static void ConvertDepaturesToMin(){
@@ -166,6 +172,41 @@ public class testingZone {
                 cond[1] = true;
             }
             
+        }
+
+        public static void CheckDepArriveValidation(){//if dep bigger than arr
+            //departureVals
+            String[] departureAdded = addedFlight.departure.split(":");
+            int departureHour = Integer.parseInt(departureAdded[0]);
+            int departureMin = Integer.parseInt(departureAdded[1]);
+            //total departures
+            int departureTotal = (departureHour * 60) + departureMin;
+            //arrivalVals
+            String[] arrivalAdded = addedFlight.arrival.split(":");
+            int arrivalHour = Integer.parseInt(arrivalAdded[0]);
+            int arrivalMin = Integer.parseInt(arrivalAdded[1]);
+            //arrival total
+            int arrivalTotal = (arrivalHour * 60) + arrivalMin;
+
+            if(departureTotal >= arrivalTotal){
+                cond[2] = false;
+                System.out.println("Dep cannot be bigger than arrival");
+            }else{
+                cond[2]= true;
+                System.out.println("valid success");
+            }
+
+            //if dep or arr are out of scale 00.00 and 23.59 (1416)
+            int trashold = 1416;
+            boolean rangeCheck = departureTotal > trashold || arrivalTotal > 1416;
+
+            if(!rangeCheck){
+               System.out.println("Range is valid");
+               cond[3] = true;
+            }else{
+                System.out.println("Unvalid range");
+                cond[3]= false;
+            }
         }
 
         public String getInfo(){
