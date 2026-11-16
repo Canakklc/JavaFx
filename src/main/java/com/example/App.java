@@ -1,20 +1,32 @@
 package com.example;
 import com.example.testingZone.FlightIntel;
+
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 
 public class App extends Application {
     private Scene sceneFirst;
@@ -28,6 +40,29 @@ public class App extends Application {
 
     static{
         components = new String[6];
+    }
+
+    private static void refreshFlightList(ListView<FlightIntel> flightListView) {
+        flightListView.getItems().setAll(testingZone.flightList);
+    }
+
+    private static boolean validateFlightFields(TextField[] fields, Label errorLabel) {
+        for (TextField field : fields) {
+            String value = field.getText().trim();
+            if (value.isEmpty() || value.contains("/") || value.contains("\n") || value.contains("\r")) {
+                errorLabel.setText("Complete every field. Values cannot contain '/'.");
+                return false;
+            }
+        }
+        try {
+            LocalTime.parse(fields[3].getText().trim());
+            LocalTime.parse(fields[4].getText().trim());
+        } catch (DateTimeParseException ex) {
+            errorLabel.setText("Enter departure and arrival times in HH:mm format.");
+            return false;
+        }
+        errorLabel.setText("");
+        return true;
     }
 
     @Override
@@ -54,10 +89,10 @@ public class App extends Application {
         adjustButton.setStyle("-fx-background-color:  #e66767; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8px; -fx-cursor: hand;");
 
         Button buttons[] ={testButton,searcButton,addButton};
-        for(int i = 0; i<buttons.length;i++){
-            buttons[i].setPrefHeight(40);
-            buttons[i].setPrefWidth(160);
-            buttons[i].setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8px; -fx-cursor: hand;");
+        for (Button button : buttons) {
+            button.setPrefHeight(40);
+            button.setPrefWidth(160);
+            button.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8px; -fx-cursor: hand;");
         }
         
         HBox firstAlign = new HBox();
@@ -108,17 +143,28 @@ public class App extends Application {
         failSuccessBox.setPadding(new Insets(20));
 
         //EXECUTE PAGE COMPONENTS (SECOND PAGE)
-        TextArea flightResult = new TextArea();
-        flightResult.setStyle("-fx-background-color: white; -fx-border-color: #bdc3c7; -fx-border-width: 1.5px; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 8px; -fx-font-size: 14px; -fx-font-family: 'Consolas';");
-        flightResult.setPrefWidth(500);
-        flightResult.setPrefHeight(500);
-        flightResult.setWrapText(true);
+        ListView<FlightIntel> flightListView = new ListView<>();
+        flightListView.setPrefWidth(560);
+        flightListView.setPrefHeight(460);
+        flightListView.setCellFactory(list -> new ListCell<FlightIntel>() {
+            @Override
+            protected void updateItem(FlightIntel flight, boolean empty) {
+                super.updateItem(flight, empty);
+                setText(empty || flight == null ? null : flight.getInfo());
+            }
+        });
+
+        Button editFlightButton = new Button("Edit Selected Flight");
+        editFlightButton.setDisable(true);
+        editFlightButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8px; -fx-cursor: hand;");
+        flightListView.getSelectionModel().selectedItemProperty().addListener(
+            (observable, previousFlight, selectedFlight) -> editFlightButton.setDisable(selectedFlight == null));
 
         Button backButton = new Button("Back");
         backButton.setStyle("-fx-background-color: #e66767; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8px; -fx-cursor: hand;");
 
         //Set Second Components
-        secBox.getChildren().addAll(flightResult, backButton);
+        secBox.getChildren().addAll(flightListView, editFlightButton, backButton);
 
         //SEARCH PAGE COMPONENTS(THIRD PAGE)
         Label labelSearch = new Label("Searh for your flight");
@@ -267,8 +313,8 @@ public class App extends Application {
         VBox.setMargin(loginView, new Insets(80, 0, 0, 0));
 
         //Second Page Insets
-        VBox.setMargin(flightResult, new Insets(20, 0, 0, 0));
-        VBox.setMargin(backButton, new Insets(-60, 0, 0, 0)); 
+        VBox.setMargin(flightListView, new Insets(10, 0, 10, 0));
+        VBox.setMargin(editFlightButton, new Insets(0, 0, 10, 0));
 
         //Third page insets
         VBox.setMargin(backButtonSearch, new Insets(240, 0, 0, 0));
@@ -301,19 +347,15 @@ public class App extends Application {
 
         
         //stages
-        Stage addingStage = (Stage) addButton.getScene().getWindow();
-
         Stage confirmationStage = new Stage();
         confirmationStage.setScene(addingConfirmation);
         confirmationStage.initModality(Modality.WINDOW_MODAL);
-        confirmationStage.initOwner(addingStage);
-
-        Stage confirmStage = (Stage) confirtAddingButton.getScene().getWindow();
+        confirmationStage.initOwner(stage);
 
         Stage failOrSuccessStage = new Stage();
         failOrSuccessStage.setScene(addingFailOrSuccessScene);
         failOrSuccessStage.initModality(Modality.WINDOW_MODAL);
-        failOrSuccessStage.initOwner(confirmStage);
+        failOrSuccessStage.initOwner(stage);
 
 
 
@@ -331,14 +373,67 @@ public class App extends Application {
             stage.show();
 
             // secBox.getChildren().addAll(...) buradan kaldırıldı (Çakışma hatasını önlemek için)
+            refreshFlightList(flightListView);
+        });
 
-            flightResult.clear();
-            int index = 1;
-            for(int i = 0; i < testingZone.flightList.size(); i++){
-                String text = index + "- " + testingZone.flightList.get(i).getInfo();
-                flightResult.appendText(text + "\n");
-                index += 1;
+        editFlightButton.setOnAction(edit -> {
+            FlightIntel selectedFlight = flightListView.getSelectionModel().getSelectedItem();
+            if (selectedFlight == null) {
+                return;
             }
+
+            int selectedIndex = testingZone.flightList.indexOf(selectedFlight);
+            Dialog<ButtonType> editor = new Dialog<>();
+            editor.initOwner(stage);
+            editor.setTitle("Edit Flight");
+            editor.setHeaderText("Update flight details");
+
+            ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+            editor.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+            String[] labels = {"Flight No:", "From:", "To:", "Departure:", "Arrival:", "Aircraft:"};
+            String[] values = {
+                selectedFlight.flight, selectedFlight.origin, selectedFlight.destination,
+                selectedFlight.departure, selectedFlight.arrival, selectedFlight.airCraft
+            };
+            TextField[] editFields = new TextField[values.length];
+            GridPane editGrid = new GridPane();
+            editGrid.setHgap(10);
+            editGrid.setVgap(10);
+            editGrid.setPadding(new Insets(10));
+            for (int i = 0; i < editFields.length; i++) {
+                editFields[i] = new TextField(values[i]);
+                editGrid.add(new Label(labels[i]), 0, i);
+                editGrid.add(editFields[i], 1, i);
+            }
+            Label editError = new Label();
+            editError.setStyle("-fx-text-fill: #c0392b;");
+            editGrid.add(editError, 0, editFields.length, 2, 1);
+            editor.getDialogPane().setContent(editGrid);
+
+            editor.getDialogPane().lookupButton(saveButtonType).addEventFilter(ActionEvent.ACTION, save -> {
+                if (!validateFlightFields(editFields, editError)) {
+                    save.consume();
+                    return;
+                }
+                try {
+                    FlightIntel.UpdateFlight(
+                        selectedIndex,
+                        editFields[0].getText().trim(),
+                        editFields[1].getText().trim(),
+                        editFields[2].getText().trim(),
+                        editFields[3].getText().trim(),
+                        editFields[4].getText().trim(),
+                        editFields[5].getText().trim()
+                    );
+                    refreshFlightList(flightListView);
+                    flightListView.getSelectionModel().select(selectedIndex);
+                } catch (IOException ex) {
+                    editError.setText("Could not save flight changes: " + ex.getMessage());
+                    save.consume();
+                }
+            });
+            editor.showAndWait();
         });
 
         backButton.setOnAction(back -> {
@@ -370,7 +465,7 @@ public class App extends Application {
                 if(result == null) vieWSearchedFlight.setText("No flight found");
                 else {
                     String resulString = String.valueOf(result);
-                    vieWSearchedFlight.setText(resulString.toString());
+                    vieWSearchedFlight.setText(resulString);
                 }
              } catch (Exception e) {
                 System.out.println("Error");
@@ -389,12 +484,16 @@ public class App extends Application {
             stage.setTitle("Turkish Airlines");
             stage.setScene(sceneFirst);
             stage.show();
-            for(int i = 0; i < addFields.length; i++){
-                for(int j = 0; j < addfieFieldsSec.length; j++){
-                    if(addFields[i] == null) return;
-                    addFields[i].clear();
-                    if(addfieFieldsSec[j] == null) return;
-                    addfieFieldsSec[j].clear();
+            for (TextField addField : addFields) {
+                for (TextField addfieFieldsSec1 : addfieFieldsSec) {
+                    if (addField == null) {
+                        return;
+                    }
+                    addField.clear();
+                    if (addfieFieldsSec1 == null) {
+                        return;
+                    }
+                    addfieFieldsSec1.clear();
                 }
             }
         });
@@ -440,19 +539,17 @@ public class App extends Application {
              stage.setScene(sceneSec);
              stage.show();
 
-             flightResult.clear();
-            int index = 1;
-            for(int i = 0; i < testingZone.flightList.size(); i++){
-                String text = index + "- " + testingZone.flightList.get(i).getInfo();
-                flightResult.appendText(text + "\n");
-                index += 1;
-            }
-            for(int i = 0; i < addFields.length; i++){
-                for(int j = 0; j < addfieFieldsSec.length; j++){
-                    if(addFields[i] == null) return;
-                    addFields[i].clear();
-                    if(addfieFieldsSec[j] == null) return;
-                    addfieFieldsSec[j].clear();
+            refreshFlightList(flightListView);
+            for (TextField addField : addFields) {
+                for (TextField addfieFieldsSec1 : addfieFieldsSec) {
+                    if (addField == null) {
+                        return;
+                    }
+                    addField.clear();
+                    if (addfieFieldsSec1 == null) {
+                        return;
+                    }
+                    addfieFieldsSec1.clear();
                 }
             }
 

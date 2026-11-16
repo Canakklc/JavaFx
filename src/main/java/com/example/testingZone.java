@@ -6,19 +6,15 @@ package com.example;
 
 // Wow, a third test comment
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
-
-import javafx.stage.StageStyle;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.lang.reflect.Array;
-import java.security.cert.LDAPCertStoreParameters;
 
 public class testingZone {
             public static  ArrayList<FlightIntel> flightList = new ArrayList<>();
@@ -45,7 +41,7 @@ public class testingZone {
             this.airCraft = airCraft;
 
         }
-        String newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft;
+        // String newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft;
         
         //Method Intel
         public static void AddFlight(String newFlight, String newOrigin, String newDestination, String newDeparture, String newArrival, String newAircraft ){
@@ -67,6 +63,29 @@ public class testingZone {
                 System.out.println(e);
             }
 
+        }
+
+        public static void UpdateFlight(int index, String newFlight, String newOrigin, String newDestination,
+                String newDeparture, String newArrival, String newAircraft) throws IOException {
+            FlightIntel updatedFlight = new FlightIntel(
+                newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft);
+            ArrayList<FlightIntel> updatedFlights = new ArrayList<>(flightList);
+            updatedFlights.set(index, updatedFlight);
+
+            File dataFile = new File("datas.txt").getAbsoluteFile();
+            File tempFile = new File(dataFile.getParentFile(), "datas.txt.tmp");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(tempFile))) {
+                for (FlightIntel flight : updatedFlights) {
+                    writer.println(flight.flight + "/" + flight.origin + "/" + flight.destination + "/"
+                        + flight.departure + "/" + flight.arrival + "/" + flight.airCraft);
+                }
+                if (writer.checkError()) {
+                    throw new IOException("Unable to write updated flights to " + tempFile.getAbsolutePath());
+                }
+            }
+
+            Files.move(tempFile.toPath(), dataFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            flightList.set(index, updatedFlight);
         }
 
         public static void ConvertDepaturesToMin(){
@@ -150,15 +169,16 @@ public class testingZone {
 
         static void ReadFile(){
            try{
-             Scanner scanner = new Scanner(new File("datas.txt"));
-             while (scanner.hasNextLine()) {
-                String line =scanner.nextLine();
-                String []lines = line.split("/");
+             try (Scanner scanner = new Scanner(new File("datas.txt"))) {
+                while (scanner.hasNextLine()) {
+                    String line =scanner.nextLine();
+                    String []lines = line.split("/");
 
+                    
+                    testingZone.FlightIntel obj = new FlightIntel(lines[0], lines[1], lines[2], lines[3], lines[4], lines[5]);
+                    testingZone.flightList.add(obj);
                 
-                testingZone.FlightIntel obj = new FlightIntel(lines[0], lines[1], lines[2], lines[3], lines[4], lines[5]);
-                testingZone.flightList.add(obj);
-            
+                 }
              }
              
            }
@@ -172,25 +192,25 @@ public class testingZone {
     ArrayList<FlightIntel> foundFlightList = new ArrayList<>();
 
     try {
-        Scanner scanner = new Scanner(new File("datas.txt"));
-        while(scanner.hasNextLine()){
-            String line = scanner.nextLine();
-            String lines[] = line.split("/");
-
-            if(lines.length >= 6) { 
-                FlightIntel obj = new FlightIntel(lines[0], lines[1], lines[2], lines[3], lines[4], lines[5]);
-                foundFlightList.add(obj);
-                String newInput =input.toUpperCase().trim();
-
-                if(newInput != null && obj.flight != null && newInput.contains(obj.flight)){
-                    scanner.close();
-                    System.out.println(obj.flight);
-                    return obj;
+        try (Scanner scanner = new Scanner(new File("datas.txt"))) {
+            while(scanner.hasNextLine()){
+                String line = scanner.nextLine();
+                String lines[] = line.split("/");
+                
+                if(lines.length >= 6) {
+                    FlightIntel obj = new FlightIntel(lines[0], lines[1], lines[2], lines[3], lines[4], lines[5]);
+                    foundFlightList.add(obj);
+                    String newInput =input.toUpperCase().trim();
                     
+                    if(newInput != null && obj.flight != null && newInput.contains(obj.flight)){
+                        scanner.close();
+                        System.out.println(obj.flight);
+                        return obj;
+                        
+                    }
                 }
             }
         }
-        scanner.close(); 
     } catch(Exception e) {
         System.out.println(e.getMessage());
     }
