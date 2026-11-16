@@ -46,6 +46,9 @@ public class testingZone {
         
         //Method Intel
         public static void AddFlight(String newFlight, String newOrigin, String newDestination, String newDeparture, String newArrival, String newAircraft ){
+            // Her yeni uçuş ekleme denemesinde şartları sıfırlıyoruz
+            Arrays.fill(cond, false);
+
             addedFlight = new FlightIntel(newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft);
             CheckAirCraft();
             CheckForOverlap();
@@ -57,7 +60,7 @@ public class testingZone {
                 //Add to Datas
                 String addedFlightData = (addedFlight.flight + "/" + addedFlight.origin +"/"+ addedFlight.destination +"/" + addedFlight.departure+"/"+ addedFlight.arrival+"/"+ addedFlight.airCraft);
     
-                try(FileWriter fr = new FileWriter("datas.txt", true)){
+                try(FileWriter fr = new FileWriter("demo/datas.txt", true)){
                     PrintWriter pw = new PrintWriter(fr);
                     pw.println(addedFlightData);
                 } catch(Exception e){
@@ -146,7 +149,7 @@ public class testingZone {
                 //datas of newFlight flight(arrival)
                 String[] addedArrival = addedFlight.arrival.split(":");
                 int addedArriveHour = Integer.parseInt(addedArrival[0]);
-                int addedArriveMin = Integer.parseInt(addedArrival[1]);             
+                int addedArriveMin = Integer.parseInt(addedArrival[1]);            
                 //total min to be compared (arrival)
                 int arrivalAddedTotal = (addedArriveHour * 60) + addedArriveMin;
 
@@ -221,16 +224,26 @@ public class testingZone {
 
         static void ReadFile(){
            try{
-              Scanner scanner = new Scanner(new File("datas.txt"));
-              while (scanner.hasNextLine()) {
-                 String line = scanner.nextLine();
-                 String[] lines = line.split("/");
+               flightList.clear();
 
-                 testingZone.FlightIntel obj = new FlightIntel(lines[0], lines[1], lines[2], lines[3], lines[4], lines[5]);
-                 testingZone.flightList.add(obj);
-              }
+               File file = new File("demo/datas.txt");
+               if (!file.exists()) {
+                   file.createNewFile();
+               }
+               Scanner scanner = new Scanner(file);
+               while (scanner.hasNextLine()) {
+                  String line = scanner.nextLine();
+                  if(line.trim().isEmpty()) continue;
+                  String[] lines = line.split("/");
+
+                  if(lines.length >= 6) {
+                      testingZone.FlightIntel obj = new FlightIntel(lines[0], lines[1], lines[2], lines[3], lines[4], lines[5]);
+                      testingZone.flightList.add(obj);
+                  }
+               }
+               scanner.close();
            } catch(Exception e){
-              System.out.println("error");
+               System.out.println("error: " + e.getMessage());
            }        
         }
 
@@ -238,9 +251,10 @@ public class testingZone {
             ArrayList<FlightIntel> foundFlightList = new ArrayList<>();
 
             try {
-                Scanner scanner = new Scanner(new File("datas.txt"));
+                Scanner scanner = new Scanner(new File("demo/datas.txt"));
                 while(scanner.hasNextLine()){
                     String line = scanner.nextLine();
+                    if(line.trim().isEmpty()) continue;
                     String[] lines = line.split("/");
 
                     if(lines.length >= 6) { 

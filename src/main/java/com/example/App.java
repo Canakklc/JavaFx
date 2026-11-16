@@ -23,6 +23,7 @@ public class App extends Application {
     private Scene sceneFourth; // add
     private Scene addingConfirmation;
     private Scene addingFailOrSuccessScene;
+    private Scene errorScene; //flight could not added
     //backend
     public static String[] components;
 
@@ -80,7 +81,7 @@ public class App extends Application {
         VBox secBox = new VBox();
         secBox.setStyle("-fx-background-color: #d1a7a7");
         secBox.setAlignment(Pos.TOP_CENTER);
-        secBox.setPadding(new Insets(20)); // Düzeltildi (firstBox.setPadding yerine secBox)
+        secBox.setPadding(new Insets(20));
 
         //thirdBox
         VBox thirdBox = new VBox();
@@ -94,8 +95,8 @@ public class App extends Application {
         fourthBox.setPadding(new Insets(20));
 
         firstBox.getChildren().addAll(welcomeLabel, firstAlign, secondAllignment, loginView);
-        //Adding confirmation screen
 
+        //Adding confirmation screen
         VBox confirmation= new VBox();
         confirmation.setStyle("-fx-background-color: #d1a7a7");
         confirmation.setAlignment(Pos.TOP_CENTER);
@@ -107,6 +108,12 @@ public class App extends Application {
         failSuccessBox.setAlignment(Pos.TOP_CENTER);
         failSuccessBox.setPadding(new Insets(20));
 
+        //adding error vBox
+        VBox errorAddingFlightBox = new VBox();
+        errorAddingFlightBox.setStyle("-fx-background-color: #d1a7a7");
+        errorAddingFlightBox.setAlignment(Pos.TOP_CENTER);
+        errorAddingFlightBox.setPadding(new Insets(20));
+
         //EXECUTE PAGE COMPONENTS (SECOND PAGE)
         TextArea flightResult = new TextArea();
         flightResult.setStyle("-fx-background-color: white; -fx-border-color: #bdc3c7; -fx-border-width: 1.5px; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 8px; -fx-font-size: 14px; -fx-font-family: 'Consolas';");
@@ -117,7 +124,6 @@ public class App extends Application {
         Button backButton = new Button("Back");
         backButton.setStyle("-fx-background-color: #e66767; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8px; -fx-cursor: hand;");
 
-        //Set Second Components
         secBox.getChildren().addAll(flightResult, backButton);
 
         //SEARCH PAGE COMPONENTS(THIRD PAGE)
@@ -136,22 +142,19 @@ public class App extends Application {
         searchFliExecute.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8px; -fx-cursor: hand;");
         searchFliExecute.setMaxWidth(200);
 
-        TextArea vieWSearchedFlight = new TextArea(); //Outcome
+        TextArea vieWSearchedFlight = new TextArea(); 
         vieWSearchedFlight.setStyle("-fx-background-color: transparent; -fx-border-color: #bdc3c7; -fx-border-width: 1.5px; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 8px; -fx-font-size: 14px; -fx-font-family: 'Consolas';");
         vieWSearchedFlight.setMaxHeight(400);
         vieWSearchedFlight.setMaxWidth(600);
         
-        //Set Third Components
         thirdBox.getChildren().addAll(labelSearch, searchForFlArea, searchFliExecute, vieWSearchedFlight, backButtonSearch);
 
-         //CONFIRMATINO PAGE COMPONENTS(5TH PAGE)
+        //CONFIRMATION PAGE COMPONENTS
         Button backToAddButton = new Button("Cancel");
         backToAddButton.setStyle("-fx-background-color:  #e66767; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8px; -fx-cursor: hand;");
 
         Button confirtAddingButton = new Button("OK");
         confirtAddingButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8px; -fx-cursor: hand;");
-        //confirtAddingButton.maxWidthProperty().bind(backToAddButton.widthProperty());
-        //confirtAddingButton.maxHeightProperty().bind(backToAddButton.heightProperty());
 
         Label areYouSure = new Label("Confirm flight");
         areYouSure.setStyle("-fx-background-color: transparent; -fx-padding: 8px; -fx-font-size: 17 px; -fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-border-color: transparent;");
@@ -160,8 +163,8 @@ public class App extends Application {
         allignConfirmButtons.setAlignment(Pos.TOP_CENTER);
         allignConfirmButtons.getChildren().addAll(confirtAddingButton,backToAddButton);
 
-        //FailOrSuccsesComponents(6th page)
-        Label failOrSuccLabel = new Label("Flight has been added."); //LABEL WILL CHANGE DUE TO THE COND FROM BACKEND
+        //FailOrSuccessComponents
+        Label failOrSuccLabel = new Label("Flight has been added."); 
         failOrSuccLabel.setStyle("-fx-background-color: transparent; -fx-padding:8px; -fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-border-color: transparent");
 
         Button buttonBackFromSuccess = new Button("Back");
@@ -174,17 +177,21 @@ public class App extends Application {
         allignSuccButtonsBox.setAlignment(Pos.TOP_CENTER);
         allignSuccButtonsBox.getChildren().addAll(seeFlightsSuccess,buttonBackFromSuccess);
 
+        //Set error page COMPONENTS
+        Button backButtonInError = new Button("Back");
+        backButtonInError.setStyle("-fx-background-color: #e66767; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8px; -fx-cursor: hand;");
 
-        //SetFailOrSuccessComponents(6th page)
+        Label errorLabel = new Label("Invalid user input");
+        errorLabel.setStyle("-fx-background-color: transparent; -fx-padding: 8px; -fx-font-size: 17 px; -fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-border-color: transparent;");
+
         failSuccessBox.getChildren().addAll(failOrSuccLabel,allignSuccButtonsBox);
-        //Set confirmation page(5th page)
         confirmation.getChildren().addAll(areYouSure,allignConfirmButtons);
+        errorAddingFlightBox.getChildren().addAll(errorLabel,backButtonInError);
 
         //ADD PAGE COMPONENTS(FOURTH PAGE)
         Label addLabel = new Label("Please enter the intels that belong to your flight plan.");
         addLabel.setStyle("-fx-background-color: transparent; -fx-padding: 8px; -fx-font-size: 17 px; -fx-font-weight: bold; -fx-text-fill: #2c3e50; -fx-border-color: transparent;");      
         
-        //HBoxes for textfields
         HBox textFieldHBoxFirst = new HBox();
         textFieldHBoxFirst.setAlignment(Pos.TOP_CENTER);
         textFieldHBoxFirst.setSpacing(20);
@@ -204,9 +211,6 @@ public class App extends Application {
         allignButtonsForthPage.setSpacing(30);
         allignButtonsForthPage.getChildren().addAll(addFlightButton, exitButtonInAdd);
 
-       
-        
-        //first 3 row text
         TextField[] addFields = new TextField[3];
         for(int i = 0; i < addFields.length; i++){
             addFields[i] = new TextField();
@@ -217,7 +221,6 @@ public class App extends Application {
         addFields[1].setPromptText("Airport");
         addFields[2].setPromptText("Airport");
 
-        //sec 3 row text
         TextField[] addfieFieldsSec = new TextField[3];
         for(int i = 0; i < addfieFieldsSec.length; i++){
             addfieFieldsSec[i] = new TextField();
@@ -246,7 +249,6 @@ public class App extends Application {
         labelsForTextArray[1].setText("From:");
         labelsForTextArray[2].setText("To:");
 
-        //Second Row Labels
         Label[] labelsForSecArray = new Label[3];
         for(int i = 0; i < labelsForSecArray.length; i++){
             labelsForSecArray[i] = new Label();
@@ -257,7 +259,6 @@ public class App extends Application {
         labelsForSecArray[1].setText("Arrival:");
         labelsForSecArray[2].setText("Aircraft:");
         
-        // 4. Sayfa bileşenleri başlangıçta bir kez kutuya eklenir
         fourthBox.getChildren().addAll(addLabel, labelsForText, textFieldHBoxFirst, labelsForSec, textFieldBoxSec, allignButtonsForthPage);
         fourthBox.setFocusTraversable(true);
 
@@ -266,29 +267,26 @@ public class App extends Application {
         VBox.setMargin(secondAllignment, new Insets(50, 0, 0, 0));
         VBox.setMargin(loginView, new Insets(80, 0, 0, 0));
 
-        //Second Page Insets
         VBox.setMargin(flightResult, new Insets(20, 0, 0, 0));
         VBox.setMargin(backButton, new Insets(-60, 0, 0, 0)); 
 
-        //Third page insets
         VBox.setMargin(backButtonSearch, new Insets(240, 0, 0, 0));
         VBox.setMargin(searchFliExecute, new Insets(20, 0, 0, 0));
         VBox.setMargin(vieWSearchedFlight, new Insets(50, 0, 0, 0));
 
-        //Forth Page Inslets
         VBox.setMargin(textFieldBoxSec, new Insets(10, 0, 0, 0));
         VBox.setMargin(labelsForText, new Insets(40, 48, 0, 0));
         VBox.setMargin(labelsForSec, new Insets(70, 10, 0, 0));
         VBox.setMargin(textFieldHBoxFirst, new Insets(15, 0, 0, 0));
         VBox.setMargin(allignButtonsForthPage, new Insets(140, 0, 0, 0));
         
-        //Fifth Page Instets
         VBox.setMargin(allignConfirmButtons, new Insets(120,0,0,0));
         VBox.setMargin(areYouSure, new Insets(30,0,0,0));
 
-        //Sixth Page Instets
         VBox.setMargin(allignSuccButtonsBox, new Insets(120,0,0,0));
         VBox.setMargin(failOrSuccLabel, new Insets(20,0,0,0));
+
+        VBox.setMargin(backButtonInError,new Insets(160,0,0,0));
 
         //Instantiate scenes
         sceneFirst = new Scene(firstBox, 600, 600);
@@ -297,10 +295,8 @@ public class App extends Application {
         sceneFourth = new Scene(fourthBox, 600, 600);
         addingConfirmation = new Scene(confirmation,300,300);
         addingFailOrSuccessScene = new Scene(failSuccessBox,300,300);
+        errorScene = new Scene(errorAddingFlightBox, 300, 300);
         
-
-        
-        //stages
         Stage addingStage = (Stage) addButton.getScene().getWindow();
 
         Stage confirmationStage = new Stage();
@@ -315,22 +311,27 @@ public class App extends Application {
         failOrSuccessStage.initModality(Modality.WINDOW_MODAL);
         failOrSuccessStage.initOwner(confirmStage);
 
-
-
-
+        Stage errorInAddFlight = (Stage) confirtAddingButton.getScene().getWindow();
+            
+        Stage errorStage = new Stage();
+        errorStage.setScene(errorScene);
+        errorStage.initModality(Modality.WINDOW_MODAL);
+        errorStage.initOwner(errorInAddFlight);
+        
         stage.setTitle("Turkis Air Lines");
         stage.setScene(sceneFirst);
         stage.show();
 
-        /////Events
+        // --- EVENTS ---
     
-        //Execute second page(show all flights)
+        // Execute second page (show all flights) 
         testButton.setOnAction(e -> {
             stage.setTitle("All Depatures");
             stage.setScene(sceneSec);
             stage.show();
 
-            // secBox.getChildren().addAll(...) buradan kaldırıldı (Çakışma hatasını önlemek için)
+            
+            testingZone.FlightIntel.ReadFile();
 
             flightResult.clear();
             int index = 1;
@@ -347,12 +348,10 @@ public class App extends Application {
             stage.show();
         });
 
-        //Execute Search Page
         searcButton.setOnAction(search -> {
              stage.setTitle("Search for Flight");
              stage.setScene(sceneThrid);
              stage.show();
-             // thirdBox.getChildren().addAll(...) buradan kaldırıldı
         });
 
         backButtonSearch.setOnAction(backToMain -> { 
@@ -377,12 +376,10 @@ public class App extends Application {
              }
         });
 
-        //Forth page actions
         addButton.setOnAction(add -> {
             stage.setTitle("Add Flight");
             stage.setScene(sceneFourth);
             stage.show();
-            // fourthBox.getChildren().addAll(...) buradan kaldırıldı
         });
 
         exitButtonInAdd.setOnAction(exitButtonInAddAc -> {
@@ -400,21 +397,15 @@ public class App extends Application {
         });
 
         addFlightButton.setOnAction(addFlightButtonAcc -> {
-            //stage.setTitle("Standby");
-            //stage.setScene(addingConfirmation);
-            //stage.show();
             stage.setTitle("Confirm");
             confirmationStage.show();
-
-            
         });
 
-        //CONFIRMATION PAGE
         backToAddButton.setOnAction(backToAdd ->{
             confirmationStage.close();
         });
 
-        confirtAddingButton.setOnAction(confirm ->{                                            
+        confirtAddingButton.setOnAction(confirm ->{                            
             testingZone.FlightIntel.AddFlight(
                 addFields[0].getText(), 
                 addFields[1].getText(), 
@@ -422,10 +413,15 @@ public class App extends Application {
                 addfieFieldsSec[0].getText(), 
                 addfieFieldsSec[1].getText(), 
                 addfieFieldsSec[2].getText()
-                
             );
             confirmationStage.close();
-            failOrSuccessStage.show();
+            boolean cond = testingZone.cond[0] && testingZone.cond[1] && testingZone.cond[2] && testingZone.cond[3];
+
+            if(cond){
+                failOrSuccessStage.show();
+            }else{
+                errorStage.show();
+            }
         });
 
         buttonBackFromSuccess.setOnAction(bacKSuccess ->{
@@ -434,13 +430,17 @@ public class App extends Application {
             stage.show();
         });
 
+        // See Flights Success Butonu -> TXT DOSYASINDAN GÜNCEL OKUMA EKLENDİ
         seeFlightsSuccess.setOnAction(seeFlightsSucc ->{
             failOrSuccessStage.close();
-             stage.setTitle("All Depatures");
-             stage.setScene(sceneSec);
-             stage.show();
+            stage.setTitle("All Depatures");
+            stage.setScene(sceneSec);
+            stage.show();
 
-             flightResult.clear();
+            // Dosyadan en güncel verileri çekiyoruz
+            testingZone.FlightIntel.ReadFile();
+
+            flightResult.clear();
             int index = 1;
             for(int i = 0; i < testingZone.flightList.size(); i++){
                 String text = index + "- " + testingZone.flightList.get(i).getInfo();
@@ -455,9 +455,12 @@ public class App extends Application {
                     addfieFieldsSec[j].clear();
                 }
             }
-
         });
 
+        backButtonInError.setOnAction(backInError ->{
+            errorStage.close();
+            stage.setScene(sceneFourth);
+        });
 
         adjustButton.setOnAction(closeApp -> {
             Platform.exit();
