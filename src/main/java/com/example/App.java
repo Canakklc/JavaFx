@@ -1,4 +1,8 @@
 package com.example;
+import java.io.IOException;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
+
 import com.example.testingZone.FlightIntel;
 
 import javafx.application.Application;
@@ -24,10 +28,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
-
 public class App extends Application {
     private Scene sceneFirst;
     private Scene sceneSec;
@@ -47,6 +47,8 @@ public class App extends Application {
     }
 
     private static boolean validateFlightFields(TextField[] fields, Label errorLabel) {
+        
+
         for (TextField field : fields) {
             String value = field.getText().trim();
             if (value.isEmpty() || value.contains("/") || value.contains("\n") || value.contains("\r")) {
