@@ -65,6 +65,12 @@ public class testingZone {
 
         }
 
+        // Notes for me:
+        // Need to update this with compatibility for other flights, plus itself.
+        // For example the same aircraft can't do two flights at the same time.
+        // Aircrafts should also only be allowed to leave from their current airport.
+        // Like if a flight that landed at Heathrow then left Istanbul later on, that wouldn't make sense.
+
         public static void UpdateFlight(int index, String newFlight, String newOrigin, String newDestination,
                 String newDeparture, String newArrival, String newAircraft) throws IOException {
             FlightIntel updatedFlight = new FlightIntel(
