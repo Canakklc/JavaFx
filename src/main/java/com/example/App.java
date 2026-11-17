@@ -23,307 +23,343 @@ public class App extends Application {
 
     public static String[] components = new String[6];
 
-    private static final String PLANE  = "M3 11.5L21 3l-5 18-4.5-7.5L3 11.5z M11.5 13.5L21 3";
-    private static final String SEARCH = "M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 0 0 0-13z M20 20l-4.8-4.8";
-    private static final String PLUS   = "M12 5v14M5 12h14";
-    private static final String CHECK  = "M5 12.5l4.5 4.5L19 7.5";
-    private static final String CROSS  = "M6 6l12 12M18 6L6 18";
+    Stage stage, confirmStage, resultStage, errorStage;
+    Scene homeScene, listScene, searchScene, addScene;
 
-    private static final String[] PROMPTS = {"TK Number", "Airport", "Airport", "Time", "Time", "Plane No"};
-    private static final String[] FIELD_NAMES = {"Flight No:", "From:", "To:", "Departure:", "Arrival:", "Aircraft:"};
+    Label total = new Label("0");
+    VBox recent = new VBox(10);
+    TextArea flightsArea = new TextArea();
+    TextField[] fields = new TextField[6];
 
-    private Stage stage, confirmStage, resultStage, errorStage;
-    private Scene homeScene, listScene, searchScene, addScene;
+    String planeSvg = "M3 11.5L21 3l-5 18-4.5-7.5L3 11.5z M11.5 13.5L21 3";
+    String searchSvg = "M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 0 0 0-13z M20 20l-4.8-4.8";
+    String plusSvg = "M12 5v14M5 12h14";
+    String checkSvg = "M5 12.5l4.5 4.5L19 7.5";
+    String crossSvg = "M6 6l12 12M18 6L6 18";
 
-    private final Label statNumber = label("0", "stat-number");
-    private final VBox previewBox = new VBox(10);
-    private final TextArea flightText = new TextArea();
-    private final TextField[] addFields = new TextField[6];
+    String[] prompts = {"TK Number", "Airport", "Airport", "Time", "Time", "Plane No"};
+    String[] names = {"Flight No:", "From:", "To:", "Departure:", "Arrival:", "Aircraft:"};
 
-    private Label label(String text, String style) {
+    // label with a css class
+    Label lbl(String text, String css) {
         Label l = new Label(text);
-        l.getStyleClass().add(style);
+        l.getStyleClass().add(css);
         l.setWrapText(true);
         return l;
     }
 
-    private Button button(String text, String... styles) {
-        Button b = new Button(text);
-        b.getStyleClass().addAll(styles);
-        return b;
-    }
-
-    private Region spacer() {
+    Region spacer() {
         Region r = new Region();
         HBox.setHgrow(r, Priority.ALWAYS);
         VBox.setVgrow(r, Priority.ALWAYS);
         return r;
     }
 
-    private StackPane iconChip(String path) {
-        SVGPath icon = new SVGPath();
-        icon.setContent(path);
-        icon.getStyleClass().add("icon");
-        StackPane chip = new StackPane(icon);
-        chip.getStyleClass().add("icon-chip");
-        return chip;
+    StackPane icon(String svg) {
+        SVGPath p = new SVGPath();
+        p.setContent(svg);
+        p.getStyleClass().add("icon");
+        StackPane sp = new StackPane(p);
+        sp.getStyleClass().add("icon-chip");
+        return sp;
     }
 
-    private VBox card(double gap, Node... children) {
-        VBox c = new VBox(gap, children);
-        c.getStyleClass().add("card");
-        return c;
-    }
-
-    private VBox actionCard(String icon, String title, String text, Button button) {
-        return card(8, iconChip(icon), label(title, "card-title"), label(text, "card-text"), spacer(), button);
-    }
-
-    private VBox body(VBox card) {
-        VBox b = new VBox(card);
-        b.getStyleClass().add("body");
-        b.setAlignment(Pos.TOP_CENTER);
-        return b;
-    }
-
-    private VBox titleBlock(String title, String sub) {
-        return new VBox(label(title, "hero-title"), label(sub, "hero-sub"));
-    }
-
-    private void threeColumns(GridPane grid) {
+    void columns(GridPane g) {
         for (int i = 0; i < 3; i++) {
-            ColumnConstraints c = new ColumnConstraints();
-            c.setPercentWidth(100.0 / 3);
-            grid.getColumnConstraints().add(c);
+            ColumnConstraints cc = new ColumnConstraints();
+            cc.setPercentWidth(100.0 / 3);
+            g.getColumnConstraints().add(cc);
         }
     }
 
-    private HBox header(Node... extra) {
+    HBox topBar(Button extra) {
         StackPane logo = new StackPane(new Label("TK"));
         logo.getStyleClass().add("logo");
-        VBox brand = new VBox(label("Turkish Airlines", "brand-name"), label("Staff Dashboard", "brand-sub"));
+
+        VBox brand = new VBox(lbl("Turkish Airlines", "brand-name"), lbl("Staff Dashboard", "brand-sub"));
         brand.setAlignment(Pos.CENTER_LEFT);
 
         StackPane avatar = new StackPane(new Label("ST"));
         avatar.getStyleClass().add("avatar");
-        VBox who = new VBox(label("Staff", "user-name"), label("Signed in", "user-role"));
+        VBox who = new VBox(lbl("Staff", "user-name"), lbl("Signed in", "user-role"));
         who.setAlignment(Pos.CENTER_LEFT);
         HBox user = new HBox(10, avatar, who);
         user.setAlignment(Pos.CENTER_LEFT);
 
-        HBox h = new HBox(16, logo, brand, spacer(), user);
-        h.getChildren().addAll(extra);
-        h.setAlignment(Pos.CENTER_LEFT);
-        return h;
+        HBox bar = new HBox(16, logo, brand, spacer(), user);
+        if (extra != null) bar.getChildren().add(extra);
+        bar.setAlignment(Pos.CENTER_LEFT);
+        return bar;
     }
 
-    private BorderPane page(Node heading, Node body, Node... headerButtons) {
-        VBox zone = new VBox(30, header(headerButtons), heading);
-        zone.getStyleClass().add("header-zone");
-        BorderPane p = new BorderPane(body, zone, null, null, null);
-        p.getStyleClass().add("page");
-        p.setFocusTraversable(true); 
-        return p;
+    BorderPane layout(Node heading, Node center, Button extra) {
+        VBox top = new VBox(30, topBar(extra), heading);
+        top.getStyleClass().add("header-zone");
+        BorderPane bp = new BorderPane();
+        bp.setTop(top);
+        bp.setCenter(center);
+        bp.getStyleClass().add("page");
+        bp.setFocusTraversable(true);
+        return bp;
     }
 
-    private Scene scene(Region root, double w, double h) {
-        Scene s = new Scene(root, w, h);
+    Scene newScene(Region root) {
+        Scene s = new Scene(root, 1120, 740);
         s.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
         return s;
     }
 
-    private void show(String title, Scene s) {
+    void goTo(String title, Scene s) {
         stage.setTitle(title);
         stage.setScene(s);
-        if (s == homeScene) refreshHome();
+        if (s == homeScene) updateHome();
     }
 
-    private Scene buildHome() {
-        Button seeFlights = button("Adjust/See Flights", "btn-primary", "btn-lg");
-        Button search = button("Search", "btn-dark");
-        Button add = button("Add", "btn-primary");
-        Button logOut = button("Log Out", "btn-dark");
+    Scene homeScreen() {
+        Button flightsBtn = new Button("Adjust/See Flights");
+        flightsBtn.getStyleClass().addAll("btn-primary", "btn-lg");
+        flightsBtn.setOnAction(e -> showFlights());
 
-        seeFlights.setOnAction(e -> showFlights());
-        search.setOnAction(e -> show("Search for Flight", searchScene));
-        add.setOnAction(e -> show("Add Flight", addScene));
+        Button logOut = new Button("Log Out");
+        logOut.getStyleClass().add("btn-dark");
         logOut.setOnAction(e -> Platform.exit());
 
         LocalDate today = LocalDate.now();
-        StackPane dateBadge = new StackPane(label(String.valueOf(today.getDayOfMonth()), "date-number"));
-        dateBadge.getStyleClass().add("date-badge");
-        VBox dateText = new VBox(
-                label(today.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH) + ",", "date-text"),
-                label(today.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH), "date-text"));
-        dateText.setAlignment(Pos.CENTER_LEFT);
-        Region divider = new Region();
-        divider.getStyleClass().add("divider");
-        VBox welcome = titleBlock("Welcome to the staff ", "What would you like to do today?");
+        StackPane badge = new StackPane(lbl(Integer.toString(today.getDayOfMonth()), "date-number"));
+        badge.getStyleClass().add("date-badge");
+
+        VBox dateBox = new VBox(
+            lbl(today.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH) + ",", "date-text"),
+            lbl(today.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH), "date-text"));
+        dateBox.setAlignment(Pos.CENTER_LEFT);
+
+        Region line = new Region();
+        line.getStyleClass().add("divider");
+
+        VBox welcome = new VBox(lbl("Welcome to the staff ", "hero-title"),
+                                lbl("What would you like to do today?", "hero-sub"));
         welcome.setAlignment(Pos.CENTER_LEFT);
-        HBox hero = new HBox(18, dateBadge, dateText, divider, seeFlights, spacer(), welcome);
+
+        HBox hero = new HBox(18, badge, dateBox, line, flightsBtn, spacer(), welcome);
         hero.setAlignment(Pos.CENTER_LEFT);
 
-        ImageView photo = new ImageView(new Image("file:plane.jpg"));
-        photo.setPreserveRatio(true);
-        photo.setFitWidth(300);
-        Rectangle clip = new Rectangle();
-        clip.setArcWidth(36);
-        clip.setArcHeight(36);
-        photo.layoutBoundsProperty().addListener((obs, old, b) -> {
-            clip.setWidth(b.getWidth());
-            clip.setHeight(b.getHeight());
+        // plane picture, rounded corners
+        ImageView pic = new ImageView(new Image("file:plane.jpg"));
+        pic.setPreserveRatio(true);
+        pic.setFitWidth(300);
+        Rectangle round = new Rectangle();
+        round.setArcWidth(36);
+        round.setArcHeight(36);
+        pic.layoutBoundsProperty().addListener((obs, o, b) -> {
+            round.setWidth(b.getWidth());
+            round.setHeight(b.getHeight());
         });
-        photo.setClip(clip);
-        StackPane imageCard = new StackPane(photo);
-        imageCard.getStyleClass().add("card-image");
+        pic.setClip(round);
+        StackPane picCard = new StackPane(pic);
+        picCard.getStyleClass().add("card-image");
+
+        total.getStyleClass().add("stat-number");
+        VBox statCard = new VBox(8, icon(planeSvg), lbl("Total departures", "card-text"), total,
+                                 lbl("flights on the schedule", "card-text"));
+        statCard.getStyleClass().add("card");
+
+        Button searchBtn = new Button("Search");
+        searchBtn.getStyleClass().add("btn-dark");
+        searchBtn.setOnAction(e -> goTo("Search for Flight", searchScene));
+        VBox searchCard = new VBox(8, icon(searchSvg), lbl("Find a flight", "card-title"),
+                lbl("Look up a flight by its TK number.", "card-text"), spacer(), searchBtn);
+        searchCard.getStyleClass().add("card");
+
+        Button addBtn = new Button("Add");
+        addBtn.getStyleClass().add("btn-primary");
+        addBtn.setOnAction(e -> goTo("Add Flight", addScene));
+        VBox addCard = new VBox(8, icon(plusSvg), lbl("Add a flight", "card-title"),
+                lbl("Enter the details of a new departure.", "card-text"), spacer(), addBtn);
+        addCard.getStyleClass().add("card");
+
+        VBox recentCard = new VBox(16, lbl("Recent departures", "card-title"), recent);
+        recentCard.getStyleClass().add("card");
 
         GridPane grid = new GridPane();
         grid.setHgap(20);
         grid.setVgap(20);
         grid.getStyleClass().add("body");
-        threeColumns(grid);
-        RowConstraints bottom = new RowConstraints();
-        bottom.setVgrow(Priority.ALWAYS);
-        grid.getRowConstraints().addAll(new RowConstraints(), bottom);
+        columns(grid);
+        RowConstraints r1 = new RowConstraints();
+        RowConstraints r2 = new RowConstraints();
+        r2.setVgrow(Priority.ALWAYS);
+        grid.getRowConstraints().addAll(r1, r2);
 
-        grid.add(card(8, iconChip(PLANE), label("Total departures", "card-text"), statNumber,
-                label("flights on the schedule", "card-text")), 0, 0);
-        grid.add(actionCard(SEARCH, "Find a flight", "Look up a flight by its TK number.", search), 1, 0);
-        grid.add(actionCard(PLUS, "Add a flight", "Enter the details of a new departure.", add), 2, 0);
-        grid.add(card(16, label("Recent departures", "card-title"), previewBox), 0, 1, 2, 1);
-        grid.add(imageCard, 2, 1);
+        grid.add(statCard, 0, 0);
+        grid.add(searchCard, 1, 0);
+        grid.add(addCard, 2, 0);
+        grid.add(recentCard, 0, 1, 2, 1);
+        grid.add(picCard, 2, 1);
 
-        return scene(page(hero, grid, logOut), 1120, 740);
+        return newScene(layout(hero, grid, logOut));
     }
 
-    private Scene buildList() {
-        Button back = button("Back", "btn-secondary");
-        back.setOnAction(e -> show("Turkish Airlines", homeScene));
+    Scene listScreen() {
+        Button back = new Button("Back");
+        back.getStyleClass().add("btn-secondary");
+        back.setOnAction(e -> goTo("Turkish Airlines", homeScene));
 
-        flightText.setWrapText(true);
-        VBox.setVgrow(flightText, Priority.ALWAYS);
-        VBox card = card(0, flightText);
+        flightsArea.setWrapText(true);
+        VBox.setVgrow(flightsArea, Priority.ALWAYS);
+
+        VBox card = new VBox(flightsArea);
+        card.getStyleClass().add("card");
         VBox.setVgrow(card, Priority.ALWAYS);
 
-        return scene(page(titleBlock("All departures", "Every scheduled flight in one place"), body(card), back), 1120, 740);
+        VBox body = new VBox(card);
+        body.getStyleClass().add("body");
+        body.setAlignment(Pos.TOP_CENTER);
+
+        VBox heading = new VBox(lbl("All departures", "hero-title"), lbl("Every scheduled flight in one place", "hero-sub"));
+        return newScene(layout(heading, body, back));
     }
 
-    private Scene buildSearch() {
+    Scene searchScreen() {
         TextField input = new TextField();
         input.setPromptText("TK:Number");
         input.getStyleClass().add("search-field");
         input.setFocusTraversable(false);
         HBox.setHgrow(input, Priority.ALWAYS);
 
-        Button go = button("Look for flights!", "btn-primary");
-        Button back = button("Back", "btn-secondary");
-        TextArea output = new TextArea();
-        VBox.setVgrow(output, Priority.ALWAYS);
+        Button go = new Button("Look for flights!");
+        go.getStyleClass().add("btn-primary");
+        Button back = new Button("Back");
+        back.getStyleClass().add("btn-secondary");
+
+        TextArea result = new TextArea();
+        VBox.setVgrow(result, Priority.ALWAYS);
 
         go.setOnAction(e -> {
             try {
-                FlightIntel found = FlightIntel.SearchForFlight(input.getText());
-                output.setText(found == null ? "No flight found" : String.valueOf(found));
+                FlightIntel f = FlightIntel.SearchForFlight(input.getText());
+                if (f == null) result.setText("No flight found");
+                else result.setText(String.valueOf(f));
             } catch (Exception ex) {
                 System.out.println("Error");
             }
         });
         back.setOnAction(e -> {
             input.clear();
-            output.clear();
-            show("Turkish Airlines", homeScene);
+            result.clear();
+            goTo("Turkish Airlines", homeScene);
         });
 
         HBox row = new HBox(12, input, go);
         row.setAlignment(Pos.CENTER_LEFT);
-        VBox card = card(18, label("Search for your flight", "heading-label"), row, output);
+
+        VBox card = new VBox(18, lbl("Search for your flight", "heading-label"), row, result);
+        card.getStyleClass().add("card");
         card.setMaxWidth(760);
         VBox.setVgrow(card, Priority.ALWAYS);
 
-        return scene(page(titleBlock("Search", "Find a flight by its number"), body(card), back), 1120, 740);
+        VBox body = new VBox(card);
+        body.getStyleClass().add("body");
+        body.setAlignment(Pos.TOP_CENTER);
+
+        VBox heading = new VBox(lbl("Search", "hero-title"), lbl("Find a flight by its number", "hero-sub"));
+        return newScene(layout(heading, body, back));
     }
 
-    private Scene buildAdd() {
+    Scene addScreen() {
         GridPane form = new GridPane();
         form.setHgap(18);
         form.setVgap(22);
-        threeColumns(form);
-        for (int i = 0; i < addFields.length; i++) {
-            addFields[i] = new TextField();
-            addFields[i].setPromptText(PROMPTS[i]);
-            addFields[i].setMaxWidth(Double.MAX_VALUE);
-            form.add(new VBox(8, label(FIELD_NAMES[i], "field-label"), addFields[i]), i % 3, i / 3);
+        columns(form);
+
+        for (int i = 0; i < fields.length; i++) {
+            fields[i] = new TextField();
+            fields[i].setPromptText(prompts[i]);
+            fields[i].setMaxWidth(Double.MAX_VALUE);
+            form.add(new VBox(8, lbl(names[i], "field-label"), fields[i]), i % 3, i / 3);
         }
 
-        Button back = button("Back", "btn-secondary");
-        Button add = button("Add Flight", "btn-primary");
+        Button back = new Button("Back");
+        back.getStyleClass().add("btn-secondary");
+        Button add = new Button("Add Flight");
+        add.getStyleClass().add("btn-primary");
+
         back.setOnAction(e -> {
-            clearForm();
-            show("Turkish Airlines", homeScene);
+            clearFields();
+            goTo("Turkish Airlines", homeScene);
         });
         add.setOnAction(e -> {
             stage.setTitle("Confirm");
             confirmStage.show();
         });
 
-        HBox buttons = new HBox(12, back, add);
-        buttons.setAlignment(Pos.CENTER_RIGHT);
-        VBox card = card(26, label("Please enter the intels that belong to your flight plan.", "heading-label"), form, buttons);
+        HBox btns = new HBox(12, back, add);
+        btns.setAlignment(Pos.CENTER_RIGHT);
+
+        VBox card = new VBox(26, lbl("Please enter the intels that belong to your flight plan.", "heading-label"), form, btns);
+        card.getStyleClass().add("card");
         card.setMaxWidth(860);
 
-        return scene(page(titleBlock("Add a flight", "Fill in the details and confirm"), body(card)), 1120, 740);
+        VBox body = new VBox(card);
+        body.getStyleClass().add("body");
+        body.setAlignment(Pos.TOP_CENTER);
+
+        VBox heading = new VBox(lbl("Add a flight", "hero-title"), lbl("Fill in the details and confirm", "hero-sub"));
+        return newScene(layout(heading, body, null));
     }
 
-    private Stage dialog(String icon, String title, String text, Button... buttons) {
-        Label heading = label(title, "heading-label");
-        heading.setTextAlignment(TextAlignment.CENTER);
-        HBox row = new HBox(10, buttons);
+    Stage popup(String svg, String title, String msg, Button... btns) {
+        Label t = lbl(title, "heading-label");
+        t.setTextAlignment(TextAlignment.CENTER);
+
+        HBox row = new HBox(10, btns);
         row.setAlignment(Pos.CENTER);
 
-        VBox box = new VBox(14, iconChip(icon), heading);
-        if (text != null) {
-            Label sub = label(text, "card-text");
-            sub.setTextAlignment(TextAlignment.CENTER);
-            box.getChildren().add(sub);
+        VBox box = new VBox(14, icon(svg), t);
+        if (msg != null) {
+            Label m = lbl(msg, "card-text");
+            m.setTextAlignment(TextAlignment.CENTER);
+            box.getChildren().add(m);
         }
         box.getChildren().add(row);
         box.getStyleClass().add("dialog");
         box.setAlignment(Pos.CENTER);
         box.setFocusTraversable(true);
 
-        Stage s = new Stage();
-        s.setScene(scene(box, 360, 280));
-        s.initModality(Modality.WINDOW_MODAL);
-        s.initOwner(stage);
-        return s;
+        Scene s = new Scene(box, 360, 280);
+        s.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+
+        Stage st = new Stage();
+        st.setScene(s);
+        st.initModality(Modality.WINDOW_MODAL);
+        st.initOwner(stage);
+        return st;
     }
 
-    // ---------- actions ----------
-
-    private void showFlights() {
-        FlightIntel.ReadFile(); // always list the latest data from the file
-        flightText.clear();
-        for (int i = 0; i < testingZone.flightList.size(); i++)
-            flightText.appendText((i + 1) + "- " + testingZone.flightList.get(i).getInfo() + "\n");
-        show("All Departures", listScene);
-    }
-
-    private void refreshHome() {
-        int n = testingZone.flightList.size();
-        statNumber.setText(String.valueOf(n));
-        previewBox.getChildren().clear();
-        for (int i = 0; i < Math.min(4, n); i++) {
-            Label text = new Label(String.valueOf(testingZone.flightList.get(i).getInfo()));
-            text.getStyleClass().add("row-text");
-            HBox row = new HBox(text);
-            row.getStyleClass().add("row-card");
-            previewBox.getChildren().add(row);
+    void showFlights() {
+        FlightIntel.ReadFile();
+        flightsArea.clear();
+        for (int i = 0; i < testingZone.flightList.size(); i++) {
+            flightsArea.appendText((i + 1) + "- " + testingZone.flightList.get(i).getInfo() + "\n");
         }
-        if (n == 0) previewBox.getChildren().add(label("No flights loaded yet.", "card-text"));
+        goTo("All Departures", listScene);
     }
 
-    private void clearForm() {
-        for (TextField f : addFields) f.clear();
+    void updateHome() {
+        int n = testingZone.flightList.size();
+        total.setText(String.valueOf(n));
+        recent.getChildren().clear();
+        for (int i = 0; i < n && i < 4; i++) {
+            Label l = new Label(String.valueOf(testingZone.flightList.get(i).getInfo()));
+            l.getStyleClass().add("row-text");
+            HBox row = new HBox(l);
+            row.getStyleClass().add("row-card");
+            recent.getChildren().add(row);
+        }
+        if (n == 0) recent.getChildren().add(lbl("No flights loaded yet.", "card-text"));
+    }
+
+    void clearFields() {
+        for (TextField f : fields) f.clear();
     }
 
     @Override
@@ -331,46 +367,56 @@ public class App extends Application {
         stage = primary;
         FlightIntel.ReadFile();
 
-        homeScene = buildHome();
-        listScene = buildList();
-        searchScene = buildSearch();
-        addScene = buildAdd();
+        homeScene = homeScreen();
+        listScene = listScreen();
+        searchScene = searchScreen();
+        addScene = addScreen();
 
-        Button ok = button("OK", "btn-primary");
-        Button cancel = button("Cancel", "btn-secondary");
-        confirmStage = dialog(PLANE, "Confirm flight", "This flight will be added to the schedule.", ok, cancel);
+        Button ok = new Button("OK");
+        ok.getStyleClass().add("btn-primary");
+        Button cancel = new Button("Cancel");
+        cancel.getStyleClass().add("btn-secondary");
+        confirmStage = popup(planeSvg, "Confirm flight", "This flight will be added to the schedule.", ok, cancel);
 
-        Button seeFlights = button("See Flights", "btn-primary");
-        Button back = button("Back", "btn-secondary");
-        resultStage = dialog(CHECK, "Flight has been added.", null, seeFlights, back);
+        Button seeFlights = new Button("See Flights");
+        seeFlights.getStyleClass().add("btn-primary");
+        Button back = new Button("Back");
+        back.getStyleClass().add("btn-secondary");
+        resultStage = popup(checkSvg, "Flight has been added.", null, seeFlights, back);
 
-        Button errorBack = button("Back", "btn-secondary");
-        errorStage = dialog(CROSS, "Invalid user input", null, errorBack);
+        Button errBack = new Button("Back");
+        errBack.getStyleClass().add("btn-secondary");
+        errorStage = popup(crossSvg, "Invalid user input", null, errBack);
 
         cancel.setOnAction(e -> confirmStage.close());
+
         ok.setOnAction(e -> {
-            FlightIntel.AddFlight(addFields[0].getText(), addFields[1].getText(), addFields[2].getText(),
-                    addFields[3].getText(), addFields[4].getText(), addFields[5].getText());
+            FlightIntel.AddFlight(fields[0].getText(), fields[1].getText(), fields[2].getText(),
+                    fields[3].getText(), fields[4].getText(), fields[5].getText());
             confirmStage.close();
-            boolean valid = testingZone.cond[0] && testingZone.cond[1] && testingZone.cond[2] && testingZone.cond[3];
-            if (valid) resultStage.show();
-            else errorStage.show();
+            if (testingZone.cond[0] && testingZone.cond[1] && testingZone.cond[2] && testingZone.cond[3])
+                resultStage.show();
+            else
+                errorStage.show();
         });
+
         back.setOnAction(e -> {
             resultStage.close();
-            show("Add Flight", addScene);
+            goTo("Add Flight", addScene);
         });
+
         seeFlights.setOnAction(e -> {
             resultStage.close();
             showFlights();
-            clearForm();
-        });
-        errorBack.setOnAction(e -> {
-            errorStage.close();
-            show("Add Flight", addScene);
+            clearFields();
         });
 
-        show("Turkish Airlines", homeScene);
+        errBack.setOnAction(e -> {
+            errorStage.close();
+            goTo("Add Flight", addScene);
+        });
+
+        goTo("Turkish Airlines", homeScene);
         stage.show();
     }
 
