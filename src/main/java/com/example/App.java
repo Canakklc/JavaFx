@@ -55,10 +55,10 @@ public class App extends Application {
         adjustButton.setStyle("-fx-background-color:  #e66767; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8px; -fx-cursor: hand;");
 
         Button buttons[] ={testButton,searcButton,addButton};
-        for(int i = 0; i<buttons.length;i++){
-            buttons[i].setPrefHeight(40);
-            buttons[i].setPrefWidth(160);
-            buttons[i].setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8px; -fx-cursor: hand;");
+        for (Button button : buttons) {
+            button.setPrefHeight(40);
+            button.setPrefWidth(160);
+            button.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 8px; -fx-cursor: hand;");
         }
         
         HBox firstAlign = new HBox();
@@ -371,7 +371,7 @@ public class App extends Application {
                 if(result == null) vieWSearchedFlight.setText("No flight found");
                 else {
                     String resulString = String.valueOf(result);
-                    vieWSearchedFlight.setText(resulString.toString());
+                    vieWSearchedFlight.setText(resulString);
                 }
              } catch (Exception e) {
                 System.out.println("Error");
