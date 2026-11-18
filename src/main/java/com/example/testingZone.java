@@ -2,19 +2,19 @@ package com.example;
 
 // Test Comment
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Scanner;
+// A second test comment
 
-import javafx.stage.StageStyle;
+// Wow, a third test comment
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
-import java.security.cert.LDAPCertStoreParameters;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
 
 public class testingZone {
     public static ArrayList<FlightIntel> flightList = new ArrayList<>();
@@ -41,7 +41,6 @@ public class testingZone {
             this.arrival = arrival;
             this.airCraft = airCraft;
         }
-
         String newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft;
         
         //Method Intel
@@ -70,6 +69,35 @@ public class testingZone {
                 System.out.println("One of the conditions or multiple is");
             }
             
+        }
+
+        // Notes for me:
+        // Need to update this with compatibility for other flights, plus itself.
+        // For example the same aircraft can't do two flights at the same time.
+        // Aircrafts should also only be allowed to leave from their current airport.
+        // Like if a flight that landed at Heathrow then left Istanbul later on, that wouldn't make sense.
+
+        public static void UpdateFlight(int index, String newFlight, String newOrigin, String newDestination,
+                String newDeparture, String newArrival, String newAircraft) throws IOException {
+            FlightIntel updatedFlight = new FlightIntel(
+                newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft);
+            ArrayList<FlightIntel> updatedFlights = new ArrayList<>(flightList);
+            updatedFlights.set(index, updatedFlight);
+
+            File dataFile = new File("datas.txt").getAbsoluteFile();
+            File tempFile = new File(dataFile.getParentFile(), "datas.txt.tmp");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(tempFile))) {
+                for (FlightIntel flight : updatedFlights) {
+                    writer.println(flight.flight + "/" + flight.origin + "/" + flight.destination + "/"
+                        + flight.departure + "/" + flight.arrival + "/" + flight.airCraft);
+                }
+                if (writer.checkError()) {
+                    throw new IOException("Unable to write updated flights to " + tempFile.getAbsolutePath());
+                }
+            }
+
+            Files.move(tempFile.toPath(), dataFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            flightList.set(index, updatedFlight);
         }
 
         public static void ConvertDepaturesToMin(){
@@ -224,58 +252,53 @@ public class testingZone {
 
         static void ReadFile(){
            try{
-               flightList.clear();
+             Scanner scanner = new Scanner(new File("datas.txt"));
+             while (scanner.hasNextLine()) {
+                String line =scanner.nextLine();
+                String []lines = line.split("/");
 
-               File file = new File("demo/datas.txt");
-               if (!file.exists()) {
-                   file.createNewFile();
-               }
-               Scanner scanner = new Scanner(file);
-               while (scanner.hasNextLine()) {
-                  String line = scanner.nextLine();
-                  if(line.trim().isEmpty()) continue;
-                  String[] lines = line.split("/");
-
-                  if(lines.length >= 6) {
-                      testingZone.FlightIntel obj = new FlightIntel(lines[0], lines[1], lines[2], lines[3], lines[4], lines[5]);
-                      testingZone.flightList.add(obj);
-                  }
-               }
-               scanner.close();
-           } catch(Exception e){
-               System.out.println("error: " + e.getMessage());
+                
+                testingZone.FlightIntel obj = new FlightIntel(lines[0], lines[1], lines[2], lines[3], lines[4], lines[5]);
+                testingZone.flightList.add(obj);
+            
+             }
+             
+           }
+           catch(Exception e){
+             System.out.println("error");
+            
            }        
         }
 
         static FlightIntel SearchForFlight(String input){
             ArrayList<FlightIntel> foundFlightList = new ArrayList<>();
 
-            try {
-                Scanner scanner = new Scanner(new File("demo/datas.txt"));
-                while(scanner.hasNextLine()){
-                    String line = scanner.nextLine();
-                    if(line.trim().isEmpty()) continue;
-                    String[] lines = line.split("/");
+    try {
+        Scanner scanner = new Scanner(new File("datas.txt"));
+        while(scanner.hasNextLine()){
+            String line = scanner.nextLine();
+            String lines[] = line.split("/");
 
-                    if(lines.length >= 6) { 
-                        FlightIntel obj = new FlightIntel(lines[0], lines[1], lines[2], lines[3], lines[4], lines[5]);
-                        foundFlightList.add(obj);
-                        String newInput = input.toUpperCase().trim();
+            if(lines.length >= 6) { 
+                FlightIntel obj = new FlightIntel(lines[0], lines[1], lines[2], lines[3], lines[4], lines[5]);
+                foundFlightList.add(obj);
+                String newInput =input.toUpperCase().trim();
 
-                        if(newInput != null && obj.flight != null && newInput.contains(obj.flight)){
-                            scanner.close();
-                            System.out.println(obj.flight);
-                            return obj;
-                        }
-                    }
+                if(newInput != null && obj.flight != null && newInput.contains(obj.flight)){
+                    scanner.close();
+                    System.out.println(obj.flight);
+                    return obj;
+                    
                 }
-                scanner.close(); 
-            } catch(Exception e) {
-                System.out.println(e.getMessage());
             }
-            
-            return null;
         }
+        scanner.close(); 
+    } catch(Exception e) {
+        System.out.println(e.getMessage());
+    }
+    
+    return null;
+}
     }
 
     public static void main(String[] args) {
