@@ -60,7 +60,7 @@ public class testingZone {
                 //Add to Datas
                 String addedFlightData = (addedFlight.flight + "/" + addedFlight.origin +"/"+ addedFlight.destination +"/" + addedFlight.departure+"/"+ addedFlight.arrival+"/"+ addedFlight.airCraft);
     
-                try(FileWriter fr = new FileWriter("demo/datas.txt", true)){
+                try(FileWriter fr = new FileWriter("datas.txt", true)){
                     PrintWriter pw = new PrintWriter(fr);
                     pw.println(addedFlightData);
                 } catch(Exception e){
@@ -226,7 +226,7 @@ public class testingZone {
            try{
                flightList.clear();
 
-               File file = new File("demo/datas.txt");
+               File file = new File("datas.txt");
                if (!file.exists()) {
                    file.createNewFile();
                }
@@ -251,7 +251,7 @@ public class testingZone {
             ArrayList<FlightIntel> foundFlightList = new ArrayList<>();
 
             try {
-                Scanner scanner = new Scanner(new File("demo/datas.txt"));
+                Scanner scanner = new Scanner(new File("datas.txt"));
                 while(scanner.hasNextLine()){
                     String line = scanner.nextLine();
                     if(line.trim().isEmpty()) continue;

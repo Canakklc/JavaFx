@@ -105,7 +105,7 @@ public class App extends Application {
 
     Scene newScene(Region root) {
         Scene s = new Scene(root, 1120, 740);
-        s.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+        s.getStylesheets().add(getClass().getResource("/com/example/style.css").toExternalForm());
         return s;
     }
 
@@ -326,7 +326,7 @@ public class App extends Application {
         box.setFocusTraversable(true);
 
         Scene s = new Scene(box, 360, 280);
-        s.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
+        s.getStylesheets().add(getClass().getResource("/com/example/style.css").toExternalForm());
 
         Stage st = new Stage();
         st.setScene(s);
