@@ -35,7 +35,7 @@ public class testingZone {
             this.airCraft = airCraft;
         }
 
-        String newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft;
+        // String newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft;
         
         //Method Intel
         public static void AddFlight(String newFlight, String newOrigin, String newDestination, String newDeparture, String newArrival, String newAircraft ){

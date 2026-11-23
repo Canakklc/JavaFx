@@ -1,23 +1,41 @@
 package com.example;
 
-import com.example.testingZone.FlightIntel;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.Locale;
+
+import com.example.testingZone.FlightIntel;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+// ----- NOTES FOR THOSE WORKING ON FRONT-END ----- //
+// App needs a way to scroll, or some sort of scaling.
+// On smaller devices, the app cuts off at the bottom with no way to scroll, or see the rest.
+// Other than that, it looks great :D
 
 public class App extends Application {
 
@@ -105,7 +123,7 @@ public class App extends Application {
 
     Scene newScene(Region root) {
         Scene s = new Scene(root, 1120, 740);
-        s.getStylesheets().add(getClass().getResource("/com/example/style.css").toExternalForm());
+        s.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
         return s;
     }
 
@@ -326,7 +344,7 @@ public class App extends Application {
         box.setFocusTraversable(true);
 
         Scene s = new Scene(box, 360, 280);
-        s.getStylesheets().add(getClass().getResource("/com/example/style.css").toExternalForm());
+        s.getStylesheets().add(getClass().getResource("style.css").toExternalForm());
 
         Stage st = new Stage();
         st.setScene(s);
