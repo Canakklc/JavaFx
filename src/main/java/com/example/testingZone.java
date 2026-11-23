@@ -2,19 +2,12 @@ package com.example;
 
 // Test Comment
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Scanner;
-
-import javafx.stage.StageStyle;
-
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
-import java.security.cert.LDAPCertStoreParameters;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
 
 public class testingZone {
     public static ArrayList<FlightIntel> flightList = new ArrayList<>();
@@ -71,6 +64,9 @@ public class testingZone {
             }
             
         }
+
+        // Add backend changes to editing flights here.
+        // Will need to be updated to work with new front-end.
 
         public static void ConvertDepaturesToMin(){
             if(addedFlight == null) return;
