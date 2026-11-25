@@ -4,7 +4,10 @@ package com.example;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -67,6 +70,29 @@ public class testingZone {
 
         // Add backend changes to editing flights here.
         // Will need to be updated to work with new front-end.
+
+        public static void UpdateFlight(int index, String newFlight, String newOrigin, String newDestination,
+                String newDeparture, String newArrival, String newAircraft) throws IOException {
+            FlightIntel updatedFlight = new FlightIntel(
+                newFlight, newOrigin, newDestination, newDeparture, newArrival, newAircraft);
+            ArrayList<FlightIntel> updatedFlights = new ArrayList<>(flightList);
+            updatedFlights.set(index, updatedFlight);
+
+            File dataFile = new File("datas.txt").getAbsoluteFile();
+            File tempFile = new File(dataFile.getParentFile(), "datas.txt.tmp");
+            try (PrintWriter writer = new PrintWriter(new FileWriter(tempFile))) {
+                for (FlightIntel flight : updatedFlights) {
+                    writer.println(flight.flight + "/" + flight.origin + "/" + flight.destination + "/"
+                        + flight.departure + "/" + flight.arrival + "/" + flight.airCraft);
+                }
+                if (writer.checkError()) {
+                    throw new IOException("Unable to write updated flights to " + tempFile.getAbsolutePath());
+                }
+            }
+
+            Files.move(tempFile.toPath(), dataFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            flightList.set(index, updatedFlight);
+        } // Code works but needs to have an updated front end in order to actually work.
 
         public static void ConvertDepaturesToMin(){
             if(addedFlight == null) return;
